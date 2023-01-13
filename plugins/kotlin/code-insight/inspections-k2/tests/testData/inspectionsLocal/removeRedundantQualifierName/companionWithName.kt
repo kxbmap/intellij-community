@@ -1,14 +1,11 @@
-// PROBLEM: none
 package my.simple.name
 
 class Child {
     fun f() {
-        Companion<caret>.value
+        Helper<caret>.value
     }
 
-    companion object {
+    companion object Helper {
         val value = 1
     }
 }
-
-// IGNORE_FIR

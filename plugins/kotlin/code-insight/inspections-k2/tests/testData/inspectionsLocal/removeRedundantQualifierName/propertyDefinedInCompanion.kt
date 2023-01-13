@@ -1,4 +1,3 @@
-// PROBLEM: none
 package my.simple.name
 
 class Inner {
@@ -10,5 +9,3 @@ class Inner {
         val MAX = 1
     }
 }
-
-// IGNORE_FIR

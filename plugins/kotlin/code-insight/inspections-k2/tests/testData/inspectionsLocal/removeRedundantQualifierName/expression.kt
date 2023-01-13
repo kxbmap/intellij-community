@@ -6,5 +6,3 @@ fun main() {
     val b = kotlin<caret>.Int.Companion.MAX_VALUE
     val c = kotlin.Int.Companion::MAX_VALUE
 }
-
-// IGNORE_FIR

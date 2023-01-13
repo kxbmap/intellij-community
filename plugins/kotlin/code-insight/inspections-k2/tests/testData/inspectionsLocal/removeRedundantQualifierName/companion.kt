@@ -1,4 +1,3 @@
-// PROBLEM: none
 package my.simple.name
 
 class Child {
@@ -10,5 +9,3 @@ class Child {
         val value = 1
     }
 }
-
-// IGNORE_FIR
