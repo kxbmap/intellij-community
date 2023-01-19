@@ -28,10 +28,10 @@ fun KtAnalysisSession.collectCallCandidates(callElement: KtElement): List<KtCall
     val (candidates, explicitReceiver) = when (callElement) {
         is KtCallElement -> {
             val explicitReceiver = callElement.getQualifiedExpressionForSelector()?.receiverExpression
-            callElement.collectCallCandidates() to explicitReceiver
+            callElement.collectCallCandidates().toList() to explicitReceiver
         }
 
-        is KtArrayAccessExpression -> callElement.collectCallCandidates() to callElement.arrayExpression
+        is KtArrayAccessExpression -> callElement.collectCallCandidates().toList() to callElement.arrayExpression
         else -> return emptyList()
     }
 
