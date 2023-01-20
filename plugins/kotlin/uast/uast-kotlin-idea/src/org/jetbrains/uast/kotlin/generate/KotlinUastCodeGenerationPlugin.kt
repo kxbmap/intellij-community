@@ -26,7 +26,6 @@ import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.*
 import org.jetbrains.kotlin.references.fe10.KtFe10SimpleNameReference
 import org.jetbrains.kotlin.resolve.scopes.utils.findClassifier
-import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 import org.jetbrains.uast.*
 import org.jetbrains.uast.generate.UParameterInfo
 import org.jetbrains.uast.generate.UastCodeGenerationPlugin
@@ -71,7 +70,7 @@ class KotlinUastCodeGenerationPlugin : UastCodeGenerationPlugin {
             else ->
                 oldPsi to newPsi
         }
-        val replaced = updOldPsi.replace(updNewPsi)?.safeAs<KtElement>()?.let { ShortenReferences.DEFAULT.process(it) }
+        val replaced = (updOldPsi.replace(updNewPsi) as? KtElement)?.let { ShortenReferences.DEFAULT.process(it) }
         return when  {
             newElement.sourcePsi is KtCallExpression && replaced is KtQualifiedExpression -> replaced.selectorExpression
             else -> replaced
@@ -100,7 +99,7 @@ class KotlinUastCodeGenerationPlugin : UastCodeGenerationPlugin {
     }
 
     override fun initializeField(uField: UField, uParameter: UParameter): UExpression? {
-        val uMethod = uParameter.getParentOfType(UMethod::class.java, false) ?: return null
+        val uMethod = uParameter.getNonStrictParentOfType<UMethod>() ?: return null
         val sourcePsi = uMethod.sourcePsi ?: return null
         if (sourcePsi is KtPrimaryConstructor) {
             if (uField.name == uParameter.name) {
@@ -183,7 +182,7 @@ class KotlinUastElementFactory(project: Project) : UastElementFactory {
             buildString {
                 if (receiver != null) {
                     append("a")
-                    receiver.sourcePsi?.nextSibling.safeAs<PsiWhiteSpace>()?.let { whitespaces ->
+                    (receiver.sourcePsi?.nextSibling as? PsiWhiteSpace)?.let { whitespaces ->
                         append(whitespaces.text)
                     }
                     append(".")
@@ -194,7 +193,7 @@ class KotlinUastElementFactory(project: Project) : UastElementFactory {
         ).getPossiblyQualifiedCallExpression() ?: return null
 
         if (receiver != null) {
-            methodCall.parent.safeAs<KtDotQualifiedExpression>()?.receiverExpression?.replace(wrapULiteral(receiver).sourcePsi!!)
+            methodCall.parentAs<KtDotQualifiedExpression>()?.receiverExpression?.replace(wrapULiteral(receiver).sourcePsi!!)
         }
 
         val valueArgumentList = methodCall.valueArgumentList
@@ -359,8 +358,8 @@ class KotlinUastElementFactory(project: Project) : UastElementFactory {
     }
 
     private fun getParentLambdaLabelName(context: PsiElement): String? {
-        val lambdaExpression = context.getParentOfType<KtLambdaExpression>(false) ?: return null
-        lambdaExpression.parent.safeAs<KtLabeledExpression>()?.let { return it.getLabelName() }
+        val lambdaExpression = context.getNonStrictParentOfType<KtLambdaExpression>() ?: return null
+        lambdaExpression.parentAs<KtLabeledExpression>()?.let { return it.getLabelName() }
         val callExpression = lambdaExpression.getStrictParentOfType<KtCallExpression>() ?: return null
         callExpression.valueArguments.find {
             it.getArgumentExpression()?.unpackFunctionLiteral(allowParentheses = false) === lambdaExpression
